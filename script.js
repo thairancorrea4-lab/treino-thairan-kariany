@@ -11,6 +11,74 @@ import { firebaseConfig, databasePath } from "./firebase-config.js";
 
 const usuarios = ["Thairan Gostosão ", "Kariany"];
 
+const treinosProntosKariany = {
+  "dia-1": {
+    nome: "Dia 1 - Pernas e Glúteos | Ênfase em Quadríceps",
+    exercicios: [
+      { nome: "Agachamento livre", series: "4", repeticoes: "8-10", observacao: "Aumentar a carga progressivamente" },
+      { nome: "Leg press 45º", series: "4", repeticoes: "12", observacao: "Última série drop set" },
+      { nome: "Afundo búlgaro com halteres", series: "3", repeticoes: "10 cada perna", observacao: "" },
+      { nome: "Cadeira extensora", series: "3", repeticoes: "12-15", observacao: "" },
+      { nome: "Agachamento hack", series: "3", repeticoes: "12-15", observacao: "" },
+      { nome: "Panturrilha no Smith", series: "4", repeticoes: "15-20", observacao: "" },
+      { nome: "Esteira", series: "1", repeticoes: "15 min", observacao: "Finalização" }
+    ]
+  },
+  "dia-2": {
+    nome: "Dia 2 - Superiores | Ênfase em Costas e Ombros",
+    exercicios: [
+      { nome: "Barra fixa ou puxador frontal", series: "4", repeticoes: "8-10", observacao: "" },
+      { nome: "Remada curvada com barra", series: "3", repeticoes: "12", observacao: "" },
+      { nome: "Desenvolvimento militar com halteres", series: "4", repeticoes: "10", observacao: "" },
+      { nome: "Elevação lateral + frontal", series: "3", repeticoes: "12 cada", observacao: "Bi-set" },
+      { nome: "Crucifixo com halteres", series: "3", repeticoes: "12-15", observacao: "" },
+      { nome: "Tríceps francês halteres", series: "3", repeticoes: "12-15", observacao: "" },
+      { nome: "Esteira", series: "1", repeticoes: "15 min", observacao: "Finalização" }
+    ]
+  },
+  "dia-3": {
+    nome: "Dia 3 - Pernas e Glúteos | Ênfase em Posterior e Glúteos",
+    exercicios: [
+      { nome: "Glúteo na máquina ou elevação pélvica", series: "4", repeticoes: "10-12", observacao: "Última série drop set" },
+      { nome: "Cadeira flexora", series: "3", repeticoes: "12-15", observacao: "" },
+      { nome: "Passada longa com halteres", series: "3", repeticoes: "10 cada perna", observacao: "" },
+      { nome: "Mesa flexora", series: "4", repeticoes: "10-12", observacao: "Última série drop set" },
+      { nome: "Stiff com halteres", series: "", repeticoes: "", observacao: "Progressão de carga" },
+      { nome: "Cadeira abdutora", series: "4", repeticoes: "10", observacao: "" },
+      { nome: "Panturrilha sentado", series: "4", repeticoes: "15-20", observacao: "" },
+      { nome: "Abdominal infra com caneleira", series: "4", repeticoes: "12", observacao: "" },
+      { nome: "Bike", series: "1", repeticoes: "15 min", observacao: "Alta intensidade" }
+    ]
+  },
+  "dia-4": {
+    nome: "Dia 4 - Superiores | Ênfase em Braços e Ombros",
+    exercicios: [
+      { nome: "Supino reto com halteres", series: "4", repeticoes: "10", observacao: "" },
+      { nome: "Rosca martelo com halteres", series: "3", repeticoes: "12", observacao: "" },
+      { nome: "Tríceps testa com barra W", series: "3", repeticoes: "12", observacao: "" },
+      { nome: "Crucifixo invertido", series: "3", repeticoes: "12-15", observacao: "" },
+      { nome: "Mergulho no banco", series: "3", repeticoes: "10-12", observacao: "Tríceps" },
+      { nome: "Desenvolvimento com halteres", series: "3", repeticoes: "10", observacao: "" },
+      { nome: "Rosca direta no Cross Over", series: "3", repeticoes: "10", observacao: "" },
+      { nome: "Abdominal oblíquo solo com anilha", series: "3", repeticoes: "12", observacao: "" },
+      { nome: "HIIT", series: "1", repeticoes: "15 min", observacao: "Bike ou escada" }
+    ]
+  },
+  "dia-5": {
+    nome: "Dia 5 - Pernas e Glúteos | Treino Completo",
+    exercicios: [
+      { nome: "Agachamento sumô com halteres", series: "4", repeticoes: "12", observacao: "" },
+      { nome: "Stiff com barra", series: "3", repeticoes: "12", observacao: "" },
+      { nome: "Cadeira extensora + mesa flexora", series: "3", repeticoes: "12 cada", observacao: "Bi-set" },
+      { nome: "Elevação pélvica máquina", series: "4", repeticoes: "8-10", observacao: "Máxima carga possível" },
+      { nome: "Cadeira adutora", series: "4", repeticoes: "10", observacao: "" },
+      { nome: "Levantamento terra sumô", series: "4", repeticoes: "10-12", observacao: "Tronco inclinado à frente, projetando glúteo para trás" },
+      { nome: "Panturrilha no Smith", series: "3", repeticoes: "15", observacao: "" }
+    ]
+  }
+};
+
+
 const diasSemana = [
   "Domingo",
   "Segunda-feira",
@@ -84,6 +152,8 @@ function iniciar() {
   elementos.formTreino.addEventListener("submit", salvarTreino);
   elementos.busca.addEventListener("input", renderizarTudo);
   elementos.exportarCsv.addEventListener("click", exportarCSV);
+
+  criarCampoTreinoProntoKariany();
 
   if (elementos.buscaEvolucao) {
     elementos.buscaEvolucao.addEventListener("input", renderizarGraficoEvolucao);
@@ -244,6 +314,7 @@ function trocarUsuario(usuario) {
 
   elementos.busca.value = "";
   limparFormulario();
+  atualizarCampoTreinoProntoKariany();
   renderizarTudo();
 }
 
@@ -252,6 +323,8 @@ function limparFormulario() {
   elementos.dataTreino.value = hojeISO();
   elementos.diaSemana.value = getDiaSemana(elementos.dataTreino.value);
   elementos.tipoTreino.value = "";
+  const treinoProntoKariany = document.getElementById("treinoProntoKariany");
+  if (treinoProntoKariany) treinoProntoKariany.value = "";
   elementos.observacoes.value = "";
   exerciciosForm = [];
   elementos.listaExercicios.innerHTML = "";
@@ -266,6 +339,131 @@ function limparFormulario() {
     cancelar.remove();
   }
 }
+
+
+function criarCampoTreinoProntoKariany() {
+  if (document.getElementById("grupoTreinoProntoKariany")) {
+    atualizarCampoTreinoProntoKariany();
+    return;
+  }
+
+  const labelTipoTreino = elementos.tipoTreino?.closest("label");
+  if (!labelTipoTreino) return;
+
+  const grupo = document.createElement("label");
+  grupo.id = "grupoTreinoProntoKariany";
+  grupo.innerHTML = `
+    Selecionar treino da Kariany
+    <select id="treinoProntoKariany">
+      <option value="">Selecionar dia do treino...</option>
+      <option value="dia-1">Dia 1 - Pernas e Glúteos | Quadríceps</option>
+      <option value="dia-2">Dia 2 - Superiores | Costas e Ombros</option>
+      <option value="dia-3">Dia 3 - Pernas e Glúteos | Posterior e Glúteos</option>
+      <option value="dia-4">Dia 4 - Superiores | Braços e Ombros</option>
+      <option value="dia-5">Dia 5 - Pernas e Glúteos | Completo</option>
+    </select>
+  `;
+
+  labelTipoTreino.insertAdjacentElement("afterend", grupo);
+
+  const select = document.getElementById("treinoProntoKariany");
+  select.addEventListener("change", aplicarTreinoProntoKariany);
+
+  adicionarEstiloTreinoProntoKariany();
+  atualizarCampoTreinoProntoKariany();
+}
+
+function atualizarCampoTreinoProntoKariany() {
+  const grupo = document.getElementById("grupoTreinoProntoKariany");
+  const select = document.getElementById("treinoProntoKariany");
+  if (!grupo) return;
+
+  const mostrar = usuarioAtivo === "Kariany";
+  grupo.style.display = mostrar ? "block" : "none";
+
+  if (!mostrar && select) {
+    select.value = "";
+  }
+}
+
+function adicionarEstiloTreinoProntoKariany() {
+  if (document.getElementById("estiloTreinoProntoKariany")) return;
+
+  const style = document.createElement("style");
+  style.id = "estiloTreinoProntoKariany";
+  style.textContent = `
+    #grupoTreinoProntoKariany select {
+      width: 100%;
+      margin-top: 8px;
+      border: 1px solid #3f3f46;
+      outline: none;
+      border-radius: 16px;
+      background: #050505;
+      color: #fff;
+      padding: 14px;
+      transition: 0.2s ease;
+      appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, #a3a3a3 50%),
+        linear-gradient(135deg, #a3a3a3 50%, transparent 50%);
+      background-position:
+        calc(100% - 20px) calc(50% - 3px),
+        calc(100% - 14px) calc(50% - 3px);
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      padding-right: 44px;
+    }
+
+    #grupoTreinoProntoKariany select:focus {
+      border-color: #a3e635;
+    }
+
+    .aviso-treino-pronto {
+      margin-top: 10px;
+      color: #a3e635;
+      font-size: 13px;
+      font-weight: 700;
+    }
+  `;
+
+  document.head.appendChild(style);
+}
+
+function aplicarTreinoProntoKariany() {
+  const select = document.getElementById("treinoProntoKariany");
+  const chave = select?.value;
+  if (!chave || !treinosProntosKariany[chave]) return;
+
+  const modelo = treinosProntosKariany[chave];
+
+  elementos.tipoTreino.value = modelo.nome;
+
+  exerciciosForm = modelo.exercicios.map((exercicio) => ({
+    id: criarId(),
+    nome: exercicio.nome,
+    carga: "",
+    series: exercicio.series,
+    repeticoes: exercicio.repeticoes,
+    observacao: exercicio.observacao
+  }));
+
+  renderizarExerciciosFormulario();
+
+  const avisoAntigo = document.getElementById("avisoTreinoProntoKariany");
+  if (avisoAntigo) avisoAntigo.remove();
+
+  const aviso = document.createElement("p");
+  aviso.id = "avisoTreinoProntoKariany";
+  aviso.className = "aviso-treino-pronto";
+  aviso.textContent = "Treino carregado. Agora é só preencher carga, ajustar repetições se precisar e salvar.";
+  elementos.listaExercicios.insertAdjacentElement("beforebegin", aviso);
+
+  setTimeout(() => {
+    const avisoAtual = document.getElementById("avisoTreinoProntoKariany");
+    if (avisoAtual) avisoAtual.remove();
+  }, 4000);
+}
+
 
 function adicionarExercicio() {
   exerciciosForm.push({
@@ -397,6 +595,8 @@ function editarTreino(id) {
   elementos.dataTreino.value = treino.data || hojeISO();
   elementos.diaSemana.value = getDiaSemana(elementos.dataTreino.value);
   elementos.tipoTreino.value = treino.tipoTreino || "";
+  const treinoProntoKariany = document.getElementById("treinoProntoKariany");
+  if (treinoProntoKariany) treinoProntoKariany.value = "";
   elementos.observacoes.value = treino.observacoes || "";
   exerciciosForm = (treino.exercicios || []).map((exercicio) => ({
     id: exercicio.id || criarId(),
@@ -419,6 +619,7 @@ function editarTreino(id) {
   }
 
   renderizarExerciciosFormulario();
+  atualizarCampoTreinoProntoKariany();
   renderizarTudo();
 
   if (elementos.botaoSalvarTreino) {
