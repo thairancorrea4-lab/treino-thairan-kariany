@@ -1,20 +1,20 @@
-SITE DE TREINO EM TEMPO REAL - THAIRAN E KARIANY
+SITE DE TREINO - VERSÃO COMPLETA
 
-Arquivos:
-- index.html
-- style.css
-- script.js
-- firebase-config.js
-- README.txt
+Atualizações incluídas:
+- Edição de treino já salvo
+- Calendário de frequência mensal
+- Gráfico simples de evolução de carga por exercício
+- Ranking da semana corrigido e melhorado
+- Visual mais adaptado para celular
+- Sem botão de excluir treino
 
-Como publicar:
-1. Crie um projeto no Firebase.
-2. Crie um Realtime Database.
-3. Copie a configuração Web do Firebase.
-4. Cole a configuração no arquivo firebase-config.js.
-5. Envie todos os arquivos para o GitHub.
-6. A Vercel vai atualizar automaticamente.
-
-Importante:
-Este site usa Firebase Realtime Database para sincronizar os treinos entre aparelhos.
-Sem configurar o Firebase, ele funciona apenas no modo local do navegador.
+Como atualizar:
+1. Extraia o ZIP.
+2. Envie estes arquivos para o GitHub, substituindo os antigos:
+   - index.html
+   - style.css
+   - script.js
+   - firebase-config.js
+   - README.txt
+3. Clique em Commit changes.
+4. Aguarde a Vercel atualizar.

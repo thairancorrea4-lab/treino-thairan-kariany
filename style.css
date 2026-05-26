@@ -12,6 +12,7 @@
   --green: #a3e635;
   --green-soft: #bef264;
   --danger: #fb7185;
+  --warning: #facc15;
 }
 
 html {
@@ -51,7 +52,8 @@ button {
 
 .hero,
 .panel,
-.disputa {
+.disputa,
+.painel-extra {
   border: 1px solid var(--border);
   background: rgba(17, 17, 17, 0.88);
   border-radius: 28px;
@@ -64,11 +66,36 @@ button {
 }
 
 .hero-top,
-.disputa-top {
+.disputa-top,
+.extra-top {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 20px;
+}
+
+.status-firebase {
+  margin-bottom: 16px;
+  width: fit-content;
+  border: 1px solid rgba(163, 230, 53, 0.35);
+  background: rgba(163, 230, 53, 0.09);
+  color: #d9f99d;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.status-firebase.erro {
+  border-color: rgba(251, 113, 133, 0.4);
+  background: rgba(251, 113, 133, 0.1);
+  color: #fecdd3;
+}
+
+.status-firebase.local {
+  border-color: rgba(250, 204, 21, 0.4);
+  background: rgba(250, 204, 21, 0.1);
+  color: #fef08a;
 }
 
 .tag {
@@ -118,7 +145,8 @@ h3 {
 .btn-primary,
 .btn-submit,
 .btn-outline,
-.btn-delete {
+.btn-edit,
+.btn-cancelar {
   border: 0;
   border-radius: 16px;
   transition: 0.2s ease;
@@ -328,6 +356,21 @@ textarea {
   padding: 16px;
 }
 
+.btn-cancelar {
+  width: 100%;
+  margin-top: 10px;
+  background: transparent;
+  border: 1px solid #3f3f46;
+  color: #d4d4d4;
+  font-weight: 800;
+  padding: 14px;
+}
+
+.btn-cancelar:hover {
+  border-color: var(--warning);
+  color: var(--warning);
+}
+
 .history-top {
   display: flex;
   justify-content: space-between;
@@ -381,7 +424,7 @@ textarea {
   color: #d4d4d4;
 }
 
-.btn-delete {
+.btn-edit {
   height: fit-content;
   border: 1px solid #3f3f46;
   background: transparent;
@@ -390,9 +433,9 @@ textarea {
   font-size: 14px;
 }
 
-.btn-delete:hover {
-  border-color: var(--danger);
-  color: var(--danger);
+.btn-edit:hover {
+  border-color: var(--green);
+  color: var(--green);
 }
 
 .table-wrap {
@@ -448,17 +491,161 @@ td small {
   padding: 12px;
 }
 
+.painel-extra {
+  margin-top: 24px;
+  padding: 24px;
+}
+
+.extra-top input {
+  max-width: 360px;
+  margin-top: 0;
+}
+
+.calendario-frequencia {
+  margin-top: 18px;
+  display: grid;
+  gap: 16px;
+}
+
+.calendario-pessoa {
+  border: 1px solid var(--border);
+  background: #050505;
+  border-radius: 20px;
+  padding: 18px;
+}
+
+.calendario-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.calendario-head h3 {
+  font-size: 20px;
+}
+
+.calendario-head span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.calendario-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.dia-calendario,
+.dia-semana-label {
+  min-height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+}
+
+.dia-semana-label {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.dia-calendario {
+  background: #171717;
+  color: #d4d4d4;
+  border: 1px solid transparent;
+}
+
+.dia-calendario.vazio {
+  background: transparent;
+  border: 0;
+}
+
+.dia-calendario.treinado {
+  background: rgba(163, 230, 53, 0.15);
+  border-color: rgba(163, 230, 53, 0.55);
+  color: var(--green);
+  font-weight: 900;
+}
+
+.grafico-evolucao {
+  margin-top: 18px;
+  border: 1px solid var(--border);
+  background: #050505;
+  border-radius: 20px;
+  padding: 18px;
+}
+
+.grafico-vazio {
+  color: var(--muted);
+  text-align: center;
+  padding: 26px 10px;
+}
+
+.grafico-linha {
+  display: grid;
+  gap: 14px;
+}
+
+.grafico-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #d4d4d4;
+  font-size: 14px;
+}
+
+.barras {
+  display: grid;
+  gap: 10px;
+}
+
+.barra-item {
+  display: grid;
+  grid-template-columns: 92px 1fr 70px;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.barra-data {
+  color: var(--muted);
+}
+
+.barra-fundo {
+  height: 13px;
+  background: #171717;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.barra-preenchida {
+  height: 100%;
+  width: 0%;
+  background: var(--green);
+  border-radius: 999px;
+}
+
+.barra-carga {
+  color: #fff;
+  font-weight: 800;
+  text-align: right;
+}
+
 .disputa {
   margin-top: 24px;
   padding: 24px;
 }
 
 .resultado {
-  background: var(--green);
+  background: linear-gradient(135deg, var(--green), #d9f99d);
   color: #111;
   border-radius: 20px;
   padding: 18px;
   min-width: 310px;
+  box-shadow: 0 18px 45px rgba(163, 230, 53, 0.12);
 }
 
 .resultado span {
@@ -493,6 +680,22 @@ td small {
   background: #050505;
   border-radius: 20px;
   padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ranking-card.lider {
+  border-color: rgba(163, 230, 53, 0.7);
+  box-shadow: inset 0 0 0 1px rgba(163, 230, 53, 0.12);
+}
+
+.ranking-card.lider::before {
+  content: "🏆";
+  position: absolute;
+  right: 16px;
+  bottom: 10px;
+  font-size: 44px;
+  opacity: 0.18;
 }
 
 .ranking-head {
@@ -515,6 +718,7 @@ td small {
   padding: 7px 12px;
   color: #d4d4d4;
   font-size: 13px;
+  white-space: nowrap;
 }
 
 .ranking-numbers {
@@ -543,6 +747,7 @@ td small {
 @media (max-width: 900px) {
   .hero-top,
   .disputa-top,
+  .extra-top,
   .history-top,
   .treino-head {
     flex-direction: column;
@@ -555,7 +760,8 @@ td small {
     grid-template-columns: 1fr;
   }
 
-  .history-top input {
+  .history-top input,
+  .extra-top input {
     max-width: none;
   }
 
@@ -564,7 +770,7 @@ td small {
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 650px) {
   .container {
     width: min(100% - 20px, 1200px);
     padding: 18px 0;
@@ -572,7 +778,8 @@ td small {
 
   .hero,
   .panel,
-  .disputa {
+  .disputa,
+  .painel-extra {
     border-radius: 22px;
     padding: 18px;
   }
@@ -586,29 +793,92 @@ td small {
   .exercicio-grid input:first-child {
     grid-column: auto;
   }
-}
 
+  h1 {
+    font-size: 38px;
+  }
 
-.status-firebase {
-  margin-bottom: 16px;
-  width: fit-content;
-  border: 1px solid rgba(163, 230, 53, 0.35);
-  background: rgba(163, 230, 53, 0.09);
-  color: #d9f99d;
-  border-radius: 999px;
-  padding: 8px 12px;
-  font-size: 13px;
-  font-weight: 700;
-}
+  .tabs {
+    gap: 6px;
+  }
 
-.status-firebase.erro {
-  border-color: rgba(251, 113, 133, 0.4);
-  background: rgba(251, 113, 133, 0.1);
-  color: #fecdd3;
-}
+  .tab {
+    padding: 12px 8px;
+    font-size: 14px;
+  }
 
-.status-firebase.local {
-  border-color: rgba(250, 204, 21, 0.4);
-  background: rgba(250, 204, 21, 0.1);
-  color: #fef08a;
+  .card strong,
+  .ranking-numbers strong {
+    font-size: 30px;
+  }
+
+  .calendario-grid {
+    gap: 5px;
+  }
+
+  .dia-calendario,
+  .dia-semana-label {
+    min-height: 36px;
+    border-radius: 10px;
+    font-size: 12px;
+  }
+
+  table {
+    min-width: 0;
+  }
+
+  thead {
+    display: none;
+  }
+
+  table,
+  tbody,
+  tr,
+  td {
+    display: block;
+    width: 100%;
+  }
+
+  tr {
+    border-bottom: 1px solid var(--border);
+    padding: 12px;
+  }
+
+  tr:last-child {
+    border-bottom: 0;
+  }
+
+  td {
+    border-bottom: 0;
+    padding: 5px 0;
+  }
+
+  td:nth-child(1)::before {
+    content: "Exercício: ";
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  td:nth-child(2)::before {
+    content: "Carga: ";
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  td:nth-child(3)::before {
+    content: "Séries: ";
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  td:nth-child(4)::before {
+    content: "Reps: ";
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .barra-item {
+    grid-template-columns: 78px 1fr 58px;
+    gap: 8px;
+  }
 }

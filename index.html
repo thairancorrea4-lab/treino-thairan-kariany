@@ -84,7 +84,7 @@
             <textarea id="observacoes" rows="3" placeholder="Ex: treino bom, aumentei carga, fiz cardio, estava cansado..."></textarea>
           </label>
 
-          <button type="submit" class="btn-submit">Salvar treino</button>
+          <button type="submit" id="botaoSalvarTreino" class="btn-submit">Salvar treino</button>
         </form>
 
         <section class="panel">
@@ -100,6 +100,30 @@
             Nenhum treino registrado ainda.
           </div>
         </section>
+      </section>
+
+
+      <section class="painel-extra">
+        <div class="extra-top">
+          <div>
+            <p class="tag">Calendário</p>
+            <h2>Frequência do mês</h2>
+            <p class="subtitle-small">Veja rapidamente quais dias tiveram treino no mês atual.</p>
+          </div>
+        </div>
+        <div id="calendarioFrequencia" class="calendario-frequencia"></div>
+      </section>
+
+      <section class="painel-extra">
+        <div class="extra-top">
+          <div>
+            <p class="tag">Evolução</p>
+            <h2>Evolução de carga</h2>
+            <p class="subtitle-small">Digite o nome de um exercício para acompanhar a carga usada ao longo dos treinos.</p>
+          </div>
+          <input type="text" id="buscaEvolucao" placeholder="Ex: agachamento, leg, extensora..." />
+        </div>
+        <div id="graficoEvolucao" class="grafico-evolucao"></div>
       </section>
 
       <section class="disputa">

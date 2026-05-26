@@ -3,7 +3,8 @@ import {
   getDatabase,
   ref,
   onValue,
-  push
+  push,
+  update
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
 
 import { firebaseConfig, databasePath } from "./firebase-config.js";
@@ -20,11 +21,15 @@ const diasSemana = [
   "Sábado"
 ];
 
+const diasSemanaCurtos = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+
 let usuarioAtivo = "Thairan Gostosão ";
 let exerciciosForm = [];
 let treinos = [];
 let usandoFirebase = false;
 let treinosRef = null;
+let databaseGlobal = null;
+let editandoId = null;
 
 const elementos = {
   statusFirebase: document.getElementById("statusFirebase"),
@@ -43,8 +48,12 @@ const elementos = {
   observacoes: document.getElementById("observacoes"),
   listaExercicios: document.getElementById("listaExercicios"),
   adicionarExercicio: document.getElementById("adicionarExercicio"),
+  botaoSalvarTreino: document.getElementById("botaoSalvarTreino"),
   busca: document.getElementById("busca"),
   historico: document.getElementById("historico"),
+  calendarioFrequencia: document.getElementById("calendarioFrequencia"),
+  buscaEvolucao: document.getElementById("buscaEvolucao"),
+  graficoEvolucao: document.getElementById("graficoEvolucao"),
   periodoSemana: document.getElementById("periodoSemana"),
   resultadoSemana: document.getElementById("resultadoSemana"),
   subtituloResultado: document.getElementById("subtituloResultado"),
@@ -76,6 +85,10 @@ function iniciar() {
   elementos.busca.addEventListener("input", renderizarTudo);
   elementos.exportarCsv.addEventListener("click", exportarCSV);
 
+  if (elementos.buscaEvolucao) {
+    elementos.buscaEvolucao.addEventListener("input", renderizarGraficoEvolucao);
+  }
+
   conectarFirebase();
 }
 
@@ -101,8 +114,8 @@ function conectarFirebase() {
 
   try {
     const app = initializeApp(firebaseConfig);
-    const database = getDatabase(app);
-    treinosRef = ref(database, `${databasePath}/treinos`);
+    databaseGlobal = getDatabase(app);
+    treinosRef = ref(databaseGlobal, `${databasePath}/treinos`);
 
     usandoFirebase = true;
     elementos.statusFirebase.textContent = "Conectado em tempo real";
@@ -209,6 +222,19 @@ function treinoNaSemanaAtual(dataTreino) {
   return data >= inicio && data <= fim;
 }
 
+function normalizarTexto(texto) {
+  return String(texto || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function extrairNumero(valor) {
+  const match = String(valor || "").replace(",", ".").match(/[\d.]+/);
+  return match ? Number(match[0]) : 0;
+}
+
 function trocarUsuario(usuario) {
   usuarioAtivo = usuario;
 
@@ -222,6 +248,7 @@ function trocarUsuario(usuario) {
 }
 
 function limparFormulario() {
+  editandoId = null;
   elementos.dataTreino.value = hojeISO();
   elementos.diaSemana.value = getDiaSemana(elementos.dataTreino.value);
   elementos.tipoTreino.value = "";
@@ -229,6 +256,15 @@ function limparFormulario() {
   exerciciosForm = [];
   elementos.listaExercicios.innerHTML = "";
   adicionarExercicio();
+
+  if (elementos.botaoSalvarTreino) {
+    elementos.botaoSalvarTreino.textContent = `Salvar treino`;
+  }
+
+  const cancelar = document.getElementById("cancelarEdicao");
+  if (cancelar) {
+    cancelar.remove();
+  }
 }
 
 function adicionarExercicio() {
@@ -313,19 +349,31 @@ async function salvarTreino(event) {
     tipoTreino: elementos.tipoTreino.value.trim(),
     observacoes: elementos.observacoes.value.trim(),
     exercicios: exerciciosValidos,
-    criadoEm: new Date().toISOString()
+    atualizadoEm: new Date().toISOString()
   };
 
   try {
-    if (usandoFirebase && treinosRef) {
-      await push(treinosRef, treino);
+    if (editandoId) {
+      if (usandoFirebase && databaseGlobal) {
+        await update(ref(databaseGlobal, `${databasePath}/treinos/${editandoId}`), treino);
+      } else {
+        treinos = treinos.map((item) => item.id === editandoId ? { id: editandoId, ...treino } : item);
+        salvarTreinosLocais();
+        renderizarTudo();
+      }
     } else {
-      treinos.unshift({
-        id: criarId(),
-        ...treino
-      });
-      salvarTreinosLocais();
-      renderizarTudo();
+      treino.criadoEm = new Date().toISOString();
+
+      if (usandoFirebase && treinosRef) {
+        await push(treinosRef, treino);
+      } else {
+        treinos.unshift({
+          id: criarId(),
+          ...treino
+        });
+        salvarTreinosLocais();
+        renderizarTudo();
+      }
     }
 
     limparFormulario();
@@ -335,6 +383,61 @@ async function salvarTreino(event) {
   }
 }
 
+function editarTreino(id) {
+  const treino = treinos.find((item) => item.id === id);
+  if (!treino) return;
+
+  editandoId = id;
+  usuarioAtivo = treino.usuario;
+
+  elementos.tabs.forEach((tab) => {
+    tab.classList.toggle("active", tab.dataset.usuario === usuarioAtivo);
+  });
+
+  elementos.dataTreino.value = treino.data || hojeISO();
+  elementos.diaSemana.value = getDiaSemana(elementos.dataTreino.value);
+  elementos.tipoTreino.value = treino.tipoTreino || "";
+  elementos.observacoes.value = treino.observacoes || "";
+  exerciciosForm = (treino.exercicios || []).map((exercicio) => ({
+    id: exercicio.id || criarId(),
+    nome: exercicio.nome || "",
+    carga: exercicio.carga || "",
+    series: exercicio.series || "",
+    repeticoes: exercicio.repeticoes || "",
+    observacao: exercicio.observacao || ""
+  }));
+
+  if (exerciciosForm.length === 0) {
+    exerciciosForm = [{
+      id: criarId(),
+      nome: "",
+      carga: "",
+      series: "",
+      repeticoes: "",
+      observacao: ""
+    }];
+  }
+
+  renderizarExerciciosFormulario();
+  renderizarTudo();
+
+  if (elementos.botaoSalvarTreino) {
+    elementos.botaoSalvarTreino.textContent = "Atualizar treino";
+  }
+
+  if (!document.getElementById("cancelarEdicao")) {
+    const cancelar = document.createElement("button");
+    cancelar.type = "button";
+    cancelar.id = "cancelarEdicao";
+    cancelar.className = "btn-cancelar";
+    cancelar.textContent = "Cancelar edição";
+    cancelar.addEventListener("click", limparFormulario);
+    elementos.botaoSalvarTreino.insertAdjacentElement("afterend", cancelar);
+  }
+
+  elementos.formTreino.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function getTreinosUsuario(usuario) {
   return treinos.filter((treino) => treino.usuario === usuario);
 }
@@ -342,6 +445,8 @@ function getTreinosUsuario(usuario) {
 function renderizarTudo() {
   renderizarTopo();
   renderizarHistorico();
+  renderizarCalendario();
+  renderizarGraficoEvolucao();
   renderizarDisputa();
 }
 
@@ -413,6 +518,8 @@ function renderizarHistorico() {
               <h3>${formatarDataBR(treino.data)}</h3>
               ${treino.tipoTreino ? `<p>${escaparHTML(treino.tipoTreino)}</p>` : ""}
             </div>
+
+            <button class="btn-edit" data-id="${treino.id}">Editar</button>
           </div>
 
           <div class="table-wrap">
@@ -434,13 +541,129 @@ function renderizarHistorico() {
       `;
     })
     .join("");
+
+  elementos.historico.querySelectorAll(".btn-edit").forEach((botao) => {
+    botao.addEventListener("click", () => editarTreino(botao.dataset.id));
+  });
+}
+
+function renderizarCalendario() {
+  if (!elementos.calendarioFrequencia) return;
+
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  const mes = hoje.getMonth();
+  const totalDias = new Date(ano, mes + 1, 0).getDate();
+  const primeiroDia = new Date(ano, mes, 1).getDay();
+  const espacosInicio = primeiroDia === 0 ? 6 : primeiroDia - 1;
+
+  elementos.calendarioFrequencia.innerHTML = usuarios.map((usuario) => {
+    const treinosUsuario = getTreinosUsuario(usuario);
+    const diasTreinados = new Set(
+      treinosUsuario
+        .filter((treino) => {
+          const data = getDataLocal(treino.data);
+          return data.getFullYear() === ano && data.getMonth() === mes;
+        })
+        .map((treino) => getDataLocal(treino.data).getDate())
+    );
+
+    const labels = diasSemanaCurtos.map((dia) => `<div class="dia-semana-label">${dia}</div>`).join("");
+    const vazios = Array.from({ length: espacosInicio }, () => `<div class="dia-calendario vazio"></div>`).join("");
+    const dias = Array.from({ length: totalDias }, (_, i) => {
+      const dia = i + 1;
+      const treinado = diasTreinados.has(dia);
+      return `<div class="dia-calendario ${treinado ? "treinado" : ""}">${treinado ? "✓ " : ""}${dia}</div>`;
+    }).join("");
+
+    return `
+      <div class="calendario-pessoa">
+        <div class="calendario-head">
+          <h3>${escaparHTML(usuario)}</h3>
+          <span>${diasTreinados.size} dia${diasTreinados.size === 1 ? "" : "s"} treinado${diasTreinados.size === 1 ? "" : "s"} no mês</span>
+        </div>
+        <div class="calendario-grid">
+          ${labels}
+          ${vazios}
+          ${dias}
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderizarGraficoEvolucao() {
+  if (!elementos.graficoEvolucao) return;
+
+  const termo = normalizarTexto(elementos.buscaEvolucao?.value || "");
+  const treinosUsuario = getTreinosUsuario(usuarioAtivo);
+
+  if (!termo) {
+    elementos.graficoEvolucao.innerHTML = `<div class="grafico-vazio">Digite o nome de um exercício para ver a evolução de carga de ${escaparHTML(usuarioAtivo)}.</div>`;
+    return;
+  }
+
+  const registros = [];
+
+  treinosUsuario.forEach((treino) => {
+    treino.exercicios.forEach((exercicio) => {
+      const nome = normalizarTexto(exercicio.nome);
+      const carga = extrairNumero(exercicio.carga);
+
+      if (nome.includes(termo) && carga > 0) {
+        registros.push({
+          data: treino.data,
+          nome: exercicio.nome,
+          carga
+        });
+      }
+    });
+  });
+
+  registros.sort((a, b) => a.data.localeCompare(b.data));
+
+  if (registros.length === 0) {
+    elementos.graficoEvolucao.innerHTML = `<div class="grafico-vazio">Nenhum registro encontrado para este exercício.</div>`;
+    return;
+  }
+
+  const maiorCarga = Math.max(...registros.map((item) => item.carga));
+  const primeiraCarga = registros[0].carga;
+  const ultimaCarga = registros[registros.length - 1].carga;
+  const diferenca = ultimaCarga - primeiraCarga;
+
+  const barras = registros.map((item) => {
+    const largura = Math.max(8, (item.carga / maiorCarga) * 100);
+
+    return `
+      <div class="barra-item">
+        <div class="barra-data">${formatarDataBR(item.data)}</div>
+        <div class="barra-fundo">
+          <div class="barra-preenchida" style="width:${largura}%"></div>
+        </div>
+        <div class="barra-carga">${item.carga} kg</div>
+      </div>
+    `;
+  }).join("");
+
+  elementos.graficoEvolucao.innerHTML = `
+    <div class="grafico-linha">
+      <div class="grafico-info">
+        <strong>${escaparHTML(usuarioAtivo)}</strong>
+        <span>${registros.length} registro${registros.length === 1 ? "" : "s"} | Evolução: ${diferenca >= 0 ? "+" : ""}${diferenca} kg</span>
+      </div>
+      <div class="barras">${barras}</div>
+    </div>
+  `;
 }
 
 function renderizarDisputa() {
   const inicioSemana = dataParaISO(getInicioSemana());
   const fimSemana = dataParaISO(getFimSemana());
 
-  elementos.periodoSemana.textContent = `Semana atual: ${formatarDataBR(inicioSemana)} até ${formatarDataBR(fimSemana)}.`;
+  if (elementos.periodoSemana) {
+    elementos.periodoSemana.textContent = `Semana atual: ${formatarDataBR(inicioSemana)} até ${formatarDataBR(fimSemana)}.`;
+  }
 
   const dados = usuarios.map((usuario) => {
     const treinosUsuario = getTreinosUsuario(usuario);
@@ -453,20 +676,22 @@ function renderizarDisputa() {
     };
   });
 
-  const thairan = dados.find((item) => item.usuario === "Thairan");
-  const kariany = dados.find((item) => item.usuario === "Kariany");
+  const usuario1 = dados[0] || { usuario: usuarios[0], total: 0, semana: 0 };
+  const usuario2 = dados[1] || { usuario: usuarios[1], total: 0, semana: 0 };
 
-  elementos.totalThairan.textContent = thairan.total;
-  elementos.totalKariany.textContent = kariany.total;
+  if (elementos.totalThairan) elementos.totalThairan.textContent = usuario1.total;
+  if (elementos.totalKariany) elementos.totalKariany.textContent = usuario2.total;
 
-  elementos.semanaThairan.textContent = `${thairan.semana}x na semana`;
-  elementos.semanaKariany.textContent = `${kariany.semana}x na semana`;
+  if (elementos.semanaThairan) elementos.semanaThairan.textContent = `${usuario1.semana}x na semana`;
+  if (elementos.semanaKariany) elementos.semanaKariany.textContent = `${usuario2.semana}x na semana`;
 
-  elementos.semanaThairanNumero.textContent = thairan.semana;
-  elementos.semanaKarianyNumero.textContent = kariany.semana;
+  if (elementos.semanaThairanNumero) elementos.semanaThairanNumero.textContent = usuario1.semana;
+  if (elementos.semanaKarianyNumero) elementos.semanaKarianyNumero.textContent = usuario2.semana;
 
   const maiorSemana = Math.max(...dados.map((item) => item.semana));
   const vencedores = dados.filter((item) => item.semana === maiorSemana);
+
+  document.querySelectorAll(".ranking-card").forEach((card) => card.classList.remove("lider"));
 
   if (maiorSemana === 0) {
     elementos.resultadoSemana.textContent = "Ninguém treinou ainda esta semana";
@@ -476,12 +701,17 @@ function renderizarDisputa() {
 
   if (vencedores.length === 1) {
     const vencedor = vencedores[0];
-    elementos.resultadoSemana.textContent = `${vencedor.usuario} ganhou a semana até agora`;
+    elementos.resultadoSemana.textContent = `🏆 ${vencedor.usuario} ganhou a semana até agora`;
     elementos.subtituloResultado.textContent = `${vencedor.usuario} está na frente com ${vencedor.semana} ida${vencedor.semana > 1 ? "s" : ""}.`;
+
+    const indexVencedor = dados.findIndex((item) => item.usuario === vencedor.usuario);
+    const cards = document.querySelectorAll(".ranking-card");
+    if (cards[indexVencedor]) cards[indexVencedor].classList.add("lider");
+
     return;
   }
 
-  elementos.resultadoSemana.textContent = "Empate na semana";
+  elementos.resultadoSemana.textContent = "🔥 Empate na semana";
   elementos.subtituloResultado.textContent = `Cada um foi ${maiorSemana} vez${maiorSemana > 1 ? "es" : ""} nesta semana.`;
 }
 
@@ -530,7 +760,7 @@ function exportarCSV() {
   const link = document.createElement("a");
 
   link.href = url;
-  link.download = `treinos-${usuarioAtivo.toLowerCase()}.csv`;
+  link.download = `treinos-${normalizarTexto(usuarioAtivo).replaceAll(" ", "-")}.csv`;
   link.click();
 
   URL.revokeObjectURL(url);
