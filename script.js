@@ -79,6 +79,44 @@ const treinosProntosKariany = {
 };
 
 
+
+const treinosProntosThairan = {
+  "treino-a": {
+    nome: "Treino A - Peito, Ombro e Tríceps",
+    exercicios: [
+      { nome: "Supino reto", series: "", repeticoes: "", observacao: "" },
+      { nome: "Supino inclinado", series: "", repeticoes: "", observacao: "" },
+      { nome: "Crucifixo na máquina ou halteres", series: "", repeticoes: "", observacao: "" },
+      { nome: "Desenvolvimento", series: "", repeticoes: "", observacao: "" },
+      { nome: "Elevação lateral", series: "", repeticoes: "", observacao: "" },
+      { nome: "Tríceps corda", series: "", repeticoes: "", observacao: "" },
+      { nome: "Tríceps testa ou francês", series: "", repeticoes: "", observacao: "" }
+    ]
+  },
+  "treino-b": {
+    nome: "Treino B - Costas, Bíceps e Abdômen",
+    exercicios: [
+      { nome: "Puxador frontal", series: "", repeticoes: "", observacao: "" },
+      { nome: "Remada baixa", series: "", repeticoes: "", observacao: "" },
+      { nome: "Remada curvada ou unilateral", series: "", repeticoes: "", observacao: "" },
+      { nome: "Pulldown ou puxador neutro", series: "", repeticoes: "", observacao: "" },
+      { nome: "Rosca direta", series: "", repeticoes: "", observacao: "" },
+      { nome: "Rosca alternada", series: "", repeticoes: "", observacao: "" },
+      { nome: "Prancha abdominal", series: "", repeticoes: "", observacao: "" }
+    ]
+  },
+  "treino-c": {
+    nome: "Treino C - Pernas",
+    exercicios: [
+      { nome: "Cadeira extensora", series: "", repeticoes: "", observacao: "" },
+      { nome: "Leg press 45º", series: "", repeticoes: "", observacao: "" },
+      { nome: "Mesa flexora", series: "", repeticoes: "", observacao: "" },
+      { nome: "Panturrilha em pé ou sentado", series: "", repeticoes: "", observacao: "" },
+      { nome: "Banco Romano", series: "", repeticoes: "", observacao: "" }
+    ]
+  }
+};
+
 const diasSemana = [
   "Domingo",
   "Segunda-feira",
@@ -154,6 +192,7 @@ function iniciar() {
   elementos.exportarCsv.addEventListener("click", exportarCSV);
 
   criarCampoTreinoProntoKariany();
+  criarCampoTreinoProntoThairan();
 
   if (elementos.buscaEvolucao) {
     elementos.buscaEvolucao.addEventListener("input", renderizarGraficoEvolucao);
@@ -315,6 +354,7 @@ function trocarUsuario(usuario) {
   elementos.busca.value = "";
   limparFormulario();
   atualizarCampoTreinoProntoKariany();
+  atualizarCampoTreinoProntoThairan();
   renderizarTudo();
 }
 
@@ -325,6 +365,9 @@ function limparFormulario() {
   elementos.tipoTreino.value = "";
   const treinoProntoKariany = document.getElementById("treinoProntoKariany");
   if (treinoProntoKariany) treinoProntoKariany.value = "";
+
+  const treinoProntoThairan = document.getElementById("treinoProntoThairan");
+  if (treinoProntoThairan) treinoProntoThairan.value = "";
   elementos.observacoes.value = "";
   exerciciosForm = [];
   elementos.listaExercicios.innerHTML = "";
@@ -465,6 +508,129 @@ function aplicarTreinoProntoKariany() {
 }
 
 
+
+function criarCampoTreinoProntoThairan() {
+  if (document.getElementById("grupoTreinoProntoThairan")) {
+    atualizarCampoTreinoProntoThairan();
+    return;
+  }
+
+  const labelTipoTreino = elementos.tipoTreino?.closest("label");
+  if (!labelTipoTreino) return;
+
+  const grupo = document.createElement("label");
+  grupo.id = "grupoTreinoProntoThairan";
+  grupo.innerHTML = `
+    Selecionar treino do Thairan
+    <select id="treinoProntoThairan">
+      <option value="">Selecionar treino...</option>
+      <option value="treino-a">Treino A - Peito, Ombro e Tríceps</option>
+      <option value="treino-b">Treino B - Costas, Bíceps e Abdômen</option>
+      <option value="treino-c">Treino C - Pernas</option>
+    </select>
+  `;
+
+  labelTipoTreino.insertAdjacentElement("afterend", grupo);
+
+  const select = document.getElementById("treinoProntoThairan");
+  select.addEventListener("change", aplicarTreinoProntoThairan);
+
+  adicionarEstiloTreinoProntoThairan();
+  atualizarCampoTreinoProntoThairan();
+}
+
+function atualizarCampoTreinoProntoThairan() {
+  const grupo = document.getElementById("grupoTreinoProntoThairan");
+  const select = document.getElementById("treinoProntoThairan");
+  if (!grupo) return;
+
+  const mostrar = usuarioAtivo !== "Kariany";
+  grupo.style.display = mostrar ? "block" : "none";
+
+  if (!mostrar && select) {
+    select.value = "";
+  }
+}
+
+function adicionarEstiloTreinoProntoThairan() {
+  if (document.getElementById("estiloTreinoProntoThairan")) return;
+
+  const style = document.createElement("style");
+  style.id = "estiloTreinoProntoThairan";
+  style.textContent = `
+    #grupoTreinoProntoThairan select {
+      width: 100%;
+      margin-top: 8px;
+      border: 1px solid #3f3f46;
+      outline: none;
+      border-radius: 16px;
+      background: #050505;
+      color: #fff;
+      padding: 14px;
+      transition: 0.2s ease;
+      appearance: none;
+      background-image:
+        linear-gradient(45deg, transparent 50%, #a3a3a3 50%),
+        linear-gradient(135deg, #a3a3a3 50%, transparent 50%);
+      background-position:
+        calc(100% - 20px) calc(50% - 3px),
+        calc(100% - 14px) calc(50% - 3px);
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      padding-right: 44px;
+    }
+
+    #grupoTreinoProntoThairan select:focus {
+      border-color: #a3e635;
+    }
+
+    .aviso-treino-pronto-thairan {
+      margin-top: 10px;
+      color: #a3e635;
+      font-size: 13px;
+      font-weight: 700;
+    }
+  `;
+
+  document.head.appendChild(style);
+}
+
+function aplicarTreinoProntoThairan() {
+  const select = document.getElementById("treinoProntoThairan");
+  const chave = select?.value;
+  if (!chave || !treinosProntosThairan[chave]) return;
+
+  const modelo = treinosProntosThairan[chave];
+
+  elementos.tipoTreino.value = modelo.nome;
+
+  exerciciosForm = modelo.exercicios.map((exercicio) => ({
+    id: criarId(),
+    nome: exercicio.nome,
+    carga: "",
+    series: exercicio.series,
+    repeticoes: exercicio.repeticoes,
+    observacao: exercicio.observacao
+  }));
+
+  renderizarExerciciosFormulario();
+
+  const avisoAntigo = document.getElementById("avisoTreinoProntoThairan");
+  if (avisoAntigo) avisoAntigo.remove();
+
+  const aviso = document.createElement("p");
+  aviso.id = "avisoTreinoProntoThairan";
+  aviso.className = "aviso-treino-pronto-thairan";
+  aviso.textContent = "Treino carregado. Agora é só preencher carga, séries, repetições e salvar.";
+  elementos.listaExercicios.insertAdjacentElement("beforebegin", aviso);
+
+  setTimeout(() => {
+    const avisoAtual = document.getElementById("avisoTreinoProntoThairan");
+    if (avisoAtual) avisoAtual.remove();
+  }, 4000);
+}
+
+
 function adicionarExercicio() {
   exerciciosForm.push({
     id: criarId(),
@@ -597,6 +763,9 @@ function editarTreino(id) {
   elementos.tipoTreino.value = treino.tipoTreino || "";
   const treinoProntoKariany = document.getElementById("treinoProntoKariany");
   if (treinoProntoKariany) treinoProntoKariany.value = "";
+
+  const treinoProntoThairan = document.getElementById("treinoProntoThairan");
+  if (treinoProntoThairan) treinoProntoThairan.value = "";
   elementos.observacoes.value = treino.observacoes || "";
   exerciciosForm = (treino.exercicios || []).map((exercicio) => ({
     id: exercicio.id || criarId(),
@@ -620,6 +789,7 @@ function editarTreino(id) {
 
   renderizarExerciciosFormulario();
   atualizarCampoTreinoProntoKariany();
+  atualizarCampoTreinoProntoThairan();
   renderizarTudo();
 
   if (elementos.botaoSalvarTreino) {
