@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Treino | Thairan e Kariany</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="page">
+    <section class="container">
+      <header class="hero">
+        <div class="hero-top">
+          <div>
+            <p class="tag">Controle de treino</p>
+            <h1>Histórico de academia</h1>
+            <p class="subtitle">
+              Registre os dias treinados, exercícios feitos, carga utilizada, séries, repetições e acompanhe quem ganhou a semana.
+            </p>
+          </div>
+
+          <button id="exportarCsv" class="btn-primary">
+            Exportar CSV
+          </button>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" data-usuario="Thairan">Thairan</button>
+          <button class="tab" data-usuario="Kariany">Kariany</button>
+        </div>
+
+        <div class="cards">
+          <div class="card">
+            <span>Treinos de <b id="nomeCard">Thairan</b></span>
+            <strong id="totalTreinos">0</strong>
+          </div>
+          <div class="card">
+            <span>Dias treinados</span>
+            <strong id="diasTreinados">0</strong>
+          </div>
+          <div class="card">
+            <span>Exercícios anotados</span>
+            <strong id="totalExercicios">0</strong>
+          </div>
+        </div>
+      </header>
+
+      <section class="grid">
+        <form id="formTreino" class="panel">
+          <div class="panel-title">
+            <div>
+              <h2>Adicionar treino</h2>
+              <p>Registrando para: <b id="usuarioFormulario">Thairan</b></p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <label>
+              Data
+              <input type="date" id="dataTreino" required />
+            </label>
+
+            <label>
+              Dia da semana
+              <input type="text" id="diaSemana" readonly />
+            </label>
+          </div>
+
+          <label>
+            Tipo de treino
+            <input type="text" id="tipoTreino" placeholder="Ex: Peito e tríceps, Costas e bíceps, Perna..." />
+          </label>
+
+          <div class="exercicios-header">
+            <h3>Exercícios</h3>
+            <button type="button" id="adicionarExercicio" class="btn-outline">+ Adicionar</button>
+          </div>
+
+          <div id="listaExercicios" class="lista-exercicios"></div>
+
+          <label>
+            Observações gerais
+            <textarea id="observacoes" rows="3" placeholder="Ex: treino bom, aumentei carga, fiz cardio, estava cansado..."></textarea>
+          </label>
+
+          <button type="submit" class="btn-submit">Salvar treino</button>
+        </form>
+
+        <section class="panel">
+          <div class="history-top">
+            <div>
+              <h2 id="tituloHistorico">Histórico de Thairan</h2>
+              <p>Cada aba mostra apenas os treinos da pessoa selecionada.</p>
+            </div>
+            <input type="text" id="busca" placeholder="Buscar exercício, treino ou data..." />
+          </div>
+
+          <div id="historico" class="historico-vazio">
+            Nenhum treino registrado ainda.
+          </div>
+        </section>
+      </section>
+
+      <section class="disputa">
+        <div class="disputa-top">
+          <div>
+            <p class="tag">Disputa da semana</p>
+            <h2>Quem foi mais vezes para a academia?</h2>
+            <p id="periodoSemana" class="subtitle-small"></p>
+          </div>
+
+          <div class="resultado">
+            <span>Resultado</span>
+            <strong id="resultadoSemana">Ninguém treinou ainda esta semana</strong>
+            <p id="subtituloResultado">Assim que alguém salvar um treino, a disputa começa.</p>
+          </div>
+        </div>
+
+        <div class="ranking">
+          <div class="ranking-card">
+            <div class="ranking-head">
+              <div>
+                <h3>Thairan</h3>
+                <p>Resumo de frequência</p>
+              </div>
+              <span id="semanaThairan">0x na semana</span>
+            </div>
+
+            <div class="ranking-numbers">
+              <div>
+                <p>Total geral</p>
+                <strong id="totalThairan">0</strong>
+              </div>
+              <div>
+                <p>Nesta semana</p>
+                <strong id="semanaThairanNumero">0</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="ranking-card">
+            <div class="ranking-head">
+              <div>
+                <h3>Kariany</h3>
+                <p>Resumo de frequência</p>
+              </div>
+              <span id="semanaKariany">0x na semana</span>
+            </div>
+
+            <div class="ranking-numbers">
+              <div>
+                <p>Total geral</p>
+                <strong id="totalKariany">0</strong>
+              </div>
+              <div>
+                <p>Nesta semana</p>
+                <strong id="semanaKarianyNumero">0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
