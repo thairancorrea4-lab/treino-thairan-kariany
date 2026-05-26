@@ -3,8 +3,7 @@ import {
   getDatabase,
   ref,
   onValue,
-  push,
-  remove
+  push
 } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
 
 import { firebaseConfig, databasePath } from "./firebase-config.js";
@@ -336,26 +335,6 @@ async function salvarTreino(event) {
   }
 }
 
-async function excluirTreino(id) {
-  const confirmar = confirm("Deseja excluir este treino?");
-  if (!confirmar) return;
-
-  try {
-    if (usandoFirebase) {
-      const app = initializeApp(firebaseConfig);
-      const database = getDatabase(app);
-      await remove(ref(database, `${databasePath}/treinos/${id}`));
-    } else {
-      treinos = treinos.filter((treino) => treino.id !== id);
-      salvarTreinosLocais();
-      renderizarTudo();
-    }
-  } catch (erro) {
-    alert("Não foi possível excluir. Verifique a conexão.");
-    console.error(erro);
-  }
-}
-
 function getTreinosUsuario(usuario) {
   return treinos.filter((treino) => treino.usuario === usuario);
 }
@@ -434,8 +413,6 @@ function renderizarHistorico() {
               <h3>${formatarDataBR(treino.data)}</h3>
               ${treino.tipoTreino ? `<p>${escaparHTML(treino.tipoTreino)}</p>` : ""}
             </div>
-
-            <button class="btn-delete" data-id="${treino.id}">Excluir</button>
           </div>
 
           <div class="table-wrap">
@@ -457,10 +434,6 @@ function renderizarHistorico() {
       `;
     })
     .join("");
-
-  elementos.historico.querySelectorAll(".btn-delete").forEach((botao) => {
-    botao.addEventListener("click", () => excluirTreino(botao.dataset.id));
-  });
 }
 
 function renderizarDisputa() {
