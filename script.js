@@ -9,7 +9,7 @@ import {
 
 import { firebaseConfig, databasePath } from "./firebase-config.js";
 
-const usuarios = ["Thairan", "Kariany"];
+const usuarios = ["Thairan Gostosão ", "Kariany"];
 
 const diasSemana = [
   "Domingo",
@@ -21,7 +21,7 @@ const diasSemana = [
   "Sábado"
 ];
 
-let usuarioAtivo = "Thairan";
+let usuarioAtivo = "Thairan Gostosão ";
 let exerciciosForm = [];
 let treinos = [];
 let usandoFirebase = false;
