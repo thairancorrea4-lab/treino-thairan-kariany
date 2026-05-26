@@ -193,12 +193,21 @@ function iniciar() {
 
   criarCampoTreinoProntoKariany();
   criarCampoTreinoProntoThairan();
+  ocultarCampoTipoTreino();
 
   if (elementos.buscaEvolucao) {
     elementos.buscaEvolucao.addEventListener("input", renderizarGraficoEvolucao);
   }
 
   conectarFirebase();
+}
+
+
+function ocultarCampoTipoTreino() {
+  const labelTipoTreino = elementos.tipoTreino?.closest("label");
+  if (labelTipoTreino) {
+    labelTipoTreino.style.display = "none";
+  }
 }
 
 function firebaseFoiConfigurado() {
