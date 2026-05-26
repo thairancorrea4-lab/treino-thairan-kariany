@@ -1,3 +1,14 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import {
+  getDatabase,
+  ref,
+  onValue,
+  push,
+  remove
+} from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
+
+import { firebaseConfig, databasePath } from "./firebase-config.js";
+
 const usuarios = ["Thairan", "Kariany"];
 
 const diasSemana = [
@@ -12,9 +23,12 @@ const diasSemana = [
 
 let usuarioAtivo = "Thairan";
 let exerciciosForm = [];
-let treinos = carregarTreinos();
+let treinos = [];
+let usandoFirebase = false;
+let treinosRef = null;
 
 const elementos = {
+  statusFirebase: document.getElementById("statusFirebase"),
   tabs: document.querySelectorAll(".tab"),
   exportarCsv: document.getElementById("exportarCsv"),
   nomeCard: document.getElementById("nomeCard"),
@@ -59,17 +73,74 @@ function iniciar() {
   });
 
   elementos.adicionarExercicio.addEventListener("click", adicionarExercicio);
-
   elementos.formTreino.addEventListener("submit", salvarTreino);
-
   elementos.busca.addEventListener("input", renderizarTudo);
-
   elementos.exportarCsv.addEventListener("click", exportarCSV);
 
-  renderizarTudo();
+  conectarFirebase();
 }
 
-function carregarTreinos() {
+function firebaseFoiConfigurado() {
+  return (
+    firebaseConfig &&
+    firebaseConfig.apiKey &&
+    !firebaseConfig.apiKey.includes("COLE_") &&
+    firebaseConfig.databaseURL &&
+    !firebaseConfig.databaseURL.includes("COLE_")
+  );
+}
+
+function conectarFirebase() {
+  if (!firebaseFoiConfigurado()) {
+    usandoFirebase = false;
+    elementos.statusFirebase.textContent = "Firebase não configurado: usando modo local neste navegador";
+    elementos.statusFirebase.classList.add("local");
+    treinos = carregarTreinosLocais();
+    renderizarTudo();
+    return;
+  }
+
+  try {
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+    treinosRef = ref(database, `${databasePath}/treinos`);
+
+    usandoFirebase = true;
+    elementos.statusFirebase.textContent = "Conectado em tempo real";
+    elementos.statusFirebase.classList.remove("local", "erro");
+
+    onValue(
+      treinosRef,
+      (snapshot) => {
+        const dados = snapshot.val() || {};
+
+        treinos = Object.entries(dados).map(([id, treino]) => ({
+          id,
+          ...treino
+        }));
+
+        renderizarTudo();
+      },
+      (erro) => {
+        usandoFirebase = false;
+        elementos.statusFirebase.textContent = "Erro ao conectar no Firebase. Verifique as regras e a configuração.";
+        elementos.statusFirebase.classList.add("erro");
+        console.error(erro);
+        treinos = carregarTreinosLocais();
+        renderizarTudo();
+      }
+    );
+  } catch (erro) {
+    usandoFirebase = false;
+    elementos.statusFirebase.textContent = "Erro na configuração do Firebase. Confira o arquivo firebase-config.js";
+    elementos.statusFirebase.classList.add("erro");
+    console.error(erro);
+    treinos = carregarTreinosLocais();
+    renderizarTudo();
+  }
+}
+
+function carregarTreinosLocais() {
   try {
     const salvos = localStorage.getItem("controle-treinos-thairan-kariany");
     return salvos ? JSON.parse(salvos) : [];
@@ -78,7 +149,7 @@ function carregarTreinos() {
   }
 }
 
-function salvarNoNavegador() {
+function salvarTreinosLocais() {
   localStorage.setItem("controle-treinos-thairan-kariany", JSON.stringify(treinos));
 }
 
@@ -227,7 +298,7 @@ function renderizarExerciciosFormulario() {
   });
 }
 
-function salvarTreino(event) {
+async function salvarTreino(event) {
   event.preventDefault();
 
   const exerciciosValidos = exerciciosForm.filter((exercicio) => exercicio.nome.trim() !== "");
@@ -238,27 +309,51 @@ function salvarTreino(event) {
   }
 
   const treino = {
-    id: criarId(),
     usuario: usuarioAtivo,
     data: elementos.dataTreino.value,
     tipoTreino: elementos.tipoTreino.value.trim(),
     observacoes: elementos.observacoes.value.trim(),
-    exercicios: exerciciosValidos
+    exercicios: exerciciosValidos,
+    criadoEm: new Date().toISOString()
   };
 
-  treinos.unshift(treino);
-  salvarNoNavegador();
-  limparFormulario();
-  renderizarTudo();
+  try {
+    if (usandoFirebase && treinosRef) {
+      await push(treinosRef, treino);
+    } else {
+      treinos.unshift({
+        id: criarId(),
+        ...treino
+      });
+      salvarTreinosLocais();
+      renderizarTudo();
+    }
+
+    limparFormulario();
+  } catch (erro) {
+    alert("Não foi possível salvar. Verifique a configuração do Firebase.");
+    console.error(erro);
+  }
 }
 
-function excluirTreino(id) {
+async function excluirTreino(id) {
   const confirmar = confirm("Deseja excluir este treino?");
   if (!confirmar) return;
 
-  treinos = treinos.filter((treino) => treino.id !== id);
-  salvarNoNavegador();
-  renderizarTudo();
+  try {
+    if (usandoFirebase) {
+      const app = initializeApp(firebaseConfig);
+      const database = getDatabase(app);
+      await remove(ref(database, `${databasePath}/treinos/${id}`));
+    } else {
+      treinos = treinos.filter((treino) => treino.id !== id);
+      salvarTreinosLocais();
+      renderizarTudo();
+    }
+  } catch (erro) {
+    alert("Não foi possível excluir. Verifique a conexão.");
+    console.error(erro);
+  }
 }
 
 function getTreinosUsuario(usuario) {

@@ -587,3 +587,28 @@ td small {
     grid-column: auto;
   }
 }
+
+
+.status-firebase {
+  margin-bottom: 16px;
+  width: fit-content;
+  border: 1px solid rgba(163, 230, 53, 0.35);
+  background: rgba(163, 230, 53, 0.09);
+  color: #d9f99d;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.status-firebase.erro {
+  border-color: rgba(251, 113, 133, 0.4);
+  background: rgba(251, 113, 133, 0.1);
+  color: #fecdd3;
+}
+
+.status-firebase.local {
+  border-color: rgba(250, 204, 21, 0.4);
+  background: rgba(250, 204, 21, 0.1);
+  color: #fef08a;
+}

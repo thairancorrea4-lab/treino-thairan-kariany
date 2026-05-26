@@ -1,17 +1,20 @@
-SITE DE TREINO - THAIRAN E KARIANY
+SITE DE TREINO EM TEMPO REAL - THAIRAN E KARIANY
 
-Como usar:
-1. Extraia esta pasta.
-2. Envie os arquivos para o GitHub:
-   - index.html
-   - style.css
-   - script.js
-3. Publique na Vercel ou GitHub Pages.
+Arquivos:
+- index.html
+- style.css
+- script.js
+- firebase-config.js
+- README.txt
 
-Não precisa rodar npm install.
-Não precisa rodar npm run dev.
-Não precisa usar terminal.
+Como publicar:
+1. Crie um projeto no Firebase.
+2. Crie um Realtime Database.
+3. Copie a configuração Web do Firebase.
+4. Cole a configuração no arquivo firebase-config.js.
+5. Envie todos os arquivos para o GitHub.
+6. A Vercel vai atualizar automaticamente.
 
-Observação:
-Este site salva os dados no navegador usando localStorage.
-Isso significa que os dados ficam salvos no aparelho onde foram cadastrados.
+Importante:
+Este site usa Firebase Realtime Database para sincronizar os treinos entre aparelhos.
+Sem configurar o Firebase, ele funciona apenas no modo local do navegador.
